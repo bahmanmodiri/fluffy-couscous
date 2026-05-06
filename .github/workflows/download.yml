@@ -1,0 +1,30 @@
+name: Download CKEditor Super Build
+
+on: 
+  workflow_dispatch: # امکان اجرای دستی
+  push:
+    branches:
+      - main
+      - master
+
+permissions:
+  contents: write
+
+jobs:
+  download-file:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download CKEditor from CDN
+        run: |
+          curl -L -o ckeditor.js https://cdn.ckeditor.com/ckeditor5/40.0.0/super-build/ckeditor.js
+
+      - name: Commit and Push file
+        run: |
+          git config --global user.name "GitHub-Actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add ckeditor.js
+          git commit -m "Auto-download CKEditor Super Build" || echo "No changes to commit"
+          git push
