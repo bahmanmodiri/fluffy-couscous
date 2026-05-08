@@ -1,4 +1,4 @@
-name: Download CKEditor Super Build
+name: Download TinyMCE Self-Hosted
 
 on: 
   workflow_dispatch: # امکان اجرای دستی
@@ -11,20 +11,37 @@ permissions:
   contents: write
 
 jobs:
-  download-file:
+  download-tinymce:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Download CKEditor from CDN
+      - name: Download and Extract TinyMCE
         run: |
-          curl -L -o ckeditor.js https://cdn.ckeditor.com/ckeditor5/40.0.0/super-build/ckeditor.js
+          # 1. دانلود فایل ZIP نسخه Community (در اینجا نسخه 7.1.2 به عنوان نمونه قرار داده شده)
+          curl -L -o tinymce.zip https://download.tiny.cloud/tinymce/community/tinymce_7.1.2.zip
+          
+          # 2. اکسترکت کردن فایل ZIP در یک پوشه موقت
+          unzip tinymce.zip -d temp_tinymce
+          
+          # 3. ایجاد مسیر مقصد در پروژه شما (اگر وجود ندارد)
+          mkdir -p frontend/vendor/tinymce
+          
+          # 4. کپی کردن محتویات پوشه اصلی به مسیر استاتیک پروژه
+          cp -r temp_tinymce/tinymce/js/tinymce/* frontend/vendor/tinymce/
+          
+          # 5. پاک کردن فایل‌های موقت
+          rm -rf tinymce.zip temp_tinymce
 
-      - name: Commit and Push file
+      - name: Commit and Push files
         run: |
           git config --global user.name "GitHub-Actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add ckeditor.js
-          git commit -m "Auto-download CKEditor Super Build" || echo "No changes to commit"
+          
+          # اضافه کردن کل پوشه به گیت
+          git add frontend/vendor/tinymce/
+          
+          # کامیت و پوش
+          git commit -m "Auto-download and extract TinyMCE Self-hosted" || echo "No changes to commit"
           git push
